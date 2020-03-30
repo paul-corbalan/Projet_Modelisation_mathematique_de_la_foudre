@@ -151,12 +151,12 @@ def choix(pixelsCroissance, potentielsCroissance):
             choixFinal = pixelsCroissance[i] 
             return([choixFinal, i]) 
 
-def majPotentielsCroissance(pixelsCroissance, potentielsCroissance): 
+def majPotentielsCroissance(pixelsCroissance, potentielsCroissance, nbPart): 
     # mise a jour des potentiels de la liste complête 
     for c in range(len(pixelsCroissance)): 
         potentielsCroissance[c] = potentielsBitmap[pixelsCroissance[c][0]][pixelsCroissance[c][1]] 
  
-def main(pixelsBitmap, pixelsCroissance, potentielsCroissance): 
+def main(pixelsBitmap, pixelsCroissance, potentielsCroissance, nbPart): 
     run = True 
     init() 
     # graine: début de décharge en haut au milieu 
@@ -187,7 +187,7 @@ def main(pixelsBitmap, pixelsCroissance, potentielsCroissance):
         # définition des nouveaux sites de croissance potentiels 
         croissanceRapide(nouv, pixelsBitmap, pixelsCroissance, potentielsCroissance) 
         # mise à jour des potentiels des candidats à la croissance 
-        majPotentielsCroissance(pixelsCroissance, potentielsCroissance) 
+        majPotentielsCroissance(pixelsCroissance, potentielsCroissance, nbPart) 
         res = choix(pixelsCroissance, potentielsCroissance) 
         nouv = res[0] 
         # le point choisi est elimine des croissances possibles 
@@ -203,7 +203,8 @@ def main(pixelsBitmap, pixelsCroissance, potentielsCroissance):
         if nouv[0] == 0 or nouv[0] == N-1 or nouv[1] == N-2 or nbPart > partMax : 
             run = False 
  
-    print("N=",N,"eta=",eta,"nbpart=",nbPart,"MAXDELTA=",MAXDELTA) 
+    print("N=", N, "eta=", eta, "nbpart=", nbPart, "MAXDELTA=", MAXDELTA)
+    return nbPart
  
 
 # Partie rajoutée
@@ -221,7 +222,7 @@ def Save_txt(y, N, fichier):
         print("", file=f)
     f.close()
 
-def Print_plt(Mat, N, fichier, afficher=False):
+def Print_plt(Mat, N, eta, nbPart, fichier, afficher=False):
     x = []
     y = []
     c="blue"                    # <--- Couleur des icones
@@ -232,32 +233,36 @@ def Print_plt(Mat, N, fichier, afficher=False):
             if Mat[i][j]:
                 x.append(j)
                 y.append(N-i)
-    plt.scatter(x,y,color=c, label=fichier, s=size, marker=mk)
-    plt.title("Simulation de foudre")
-    plt.legend(loc='upper left')
+    plt.scatter(x, y, color=c,  s=size, marker=mk)
+    # title="N="+str(N)+" eta="+str(eta)+" nbpart="+str(nbPart)+" MAXDELTA="+str(MAXDELTA)
+    plt.title("N="+str(N)+" eta="+str(eta)+" nbpart="+str(nbPart)+" MAXDELTA="+str(MAXDELTA))
+    # plt.legend(loc='upper left')
     plt.axis([0,N,0,N])
-    plt.savefig(fichier+".png")
+    plt.savefig("..\\Image\\"+fichier+".png")
     if afficher:
         plt.show()
     plt.close()
 
-for MAXDELTA in range(1, 17, 9):
-    MAXDELTA = MAXDELTA/1000.0
-    for i in range(5):
+# [0.001, 0.0005, 0.0001]
+for MAXDELTA in [0.001, 0.0005, 0.0001]:
+    # MAXDELTA = MAXDELTA/1000.0
+    # [64, 128, 256, 512]
+    for N in [64, 128, 256, 512]:
+        for i in range(50):
+            nbPart=1
+            # la grille est de NxN mais en réalite la mesure d'une unité h est 1/N 
+            pixelsBitmap = [[0 for j in range(N)] for i in range(N)] 
+            # que pour le dessin pour éviter la transposition 
+            dessinBitmap = [[0 for j in range(N)] for i in range(N)] 
+            # conditions initiales -1 charge négative ou 1 charge positive ou 0 non defini sera mis à jour pendant le programme avec les nouvelles charges 
+            condInitBitmap = [[0 for j in range(N)] for i in range(N)] 
+            potentielsBitmap = [[0.0 for j in range(N)] for i in range(N)] 
+            pixelsCroissance = [] 
+            potentielsCroissance = [] 
 
-        # la grille est de NxN mais en réalite la mesure d'une unité h est 1/N 
-        pixelsBitmap = [[0 for j in range(N)] for i in range(N)] 
-        # que pour le dessin pour éviter la transposition 
-        dessinBitmap = [[0 for j in range(N)] for i in range(N)] 
-        # conditions initiales -1 charge négative ou 1 charge positive ou 0 non defini sera mis à jour pendant le programme avec les nouvelles charges 
-        condInitBitmap = [[0 for j in range(N)] for i in range(N)] 
-        potentielsBitmap = [[0.0 for j in range(N)] for i in range(N)] 
-        pixelsCroissance = [] 
-        potentielsCroissance = [] 
-
-        main(pixelsBitmap, pixelsCroissance, potentielsCroissance) 
-        
-        fichier = "foudre-"+str(N)+"-"+str(eta)+"-"+str(MAXDELTA)+"-"+datetime.now().strftime("%Y%m%d%H%M%S") 
-        #np.save(fichier,np.array(dessinBitmap)) 
-        #Save_txt(np.array(dessinBitmap), N, fichier)
-        Print_plt(np.array(dessinBitmap), N, fichier)
+            nbPart=main(pixelsBitmap, pixelsCroissance, potentielsCroissance, nbPart) 
+            
+            fichier = "foudre-"+str(N)+"-"+str(eta)+"-"+str(MAXDELTA)+"-"+str(nbPart)+"-"+datetime.now().strftime("%Y%m%d%H%M%S")
+            np.save("..\\Image\\"+fichier,np.array(dessinBitmap)) 
+            Save_txt(np.array(dessinBitmap), N, "..\\Image\\"+fichier)
+            Print_plt(np.array(dessinBitmap), N, eta, nbPart, fichier)
