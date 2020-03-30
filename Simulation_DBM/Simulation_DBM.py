@@ -252,7 +252,7 @@ def Print_plt(Mat, N, fichier, afficher=False):
     plt.title("Simulation de foudre")
     plt.legend(loc='upper left')
     plt.axis([0,N,0,N])
-    plt.savefig(fichier+".png")
+    plt.savefig("..\\Image\\"+fichier+".png")
     if afficher:
         plt.show()
     plt.close()
