@@ -1,7 +1,8 @@
 #!/usr/bin/env python3 
 # -*- coding: utf-8 -*- 
  
-import sys 
+import sys
+import os.path
 import random 
 import matplotlib.pyplot as plt 
 import numpy as np 
@@ -156,7 +157,9 @@ def majPotentielsCroissance(pixelsCroissance, potentielsCroissance, nbPart):
     for c in range(len(pixelsCroissance)): 
         potentielsCroissance[c] = potentielsBitmap[pixelsCroissance[c][0]][pixelsCroissance[c][1]] 
  
-def main(pixelsBitmap, pixelsCroissance, potentielsCroissance, nbPart): 
+def main(pixelsBitmap, pixelsCroissance, potentielsCroissance, nbPart):
+    Error=0
+    nbPart = 1 
     try:
         run = True 
         init() 
@@ -167,7 +170,6 @@ def main(pixelsBitmap, pixelsCroissance, potentielsCroissance, nbPart):
         dessinBitmap[nouv[1]][nouv[0]] = 1 
         condInitBitmap[nouv[0]][nouv[1]] = -1 
         potentielsBitmap[nouv[0]][nouv[1]] = 0 
-        nbPart = 1 
         while run == True: 
         # elimine les pixelsCroissance qui sont proche de nouv 
             eliminePixelsPres(nouv, pixelsCroissance, potentielsCroissance) 
@@ -186,6 +188,8 @@ def main(pixelsBitmap, pixelsCroissance, potentielsCroissance, nbPart):
             #print(cs, " : ", maxdelta)
                 cs += 1 
         # définition des nouveaux sites de croissance potentiels 
+            # if cs>=200:
+            #     raise ValueError
             croissanceRapide(nouv, pixelsBitmap, pixelsCroissance, potentielsCroissance) 
         # mise à jour des potentiels des candidats à la croissance 
             majPotentielsCroissance(pixelsCroissance, potentielsCroissance, nbPart) 
@@ -203,13 +207,16 @@ def main(pixelsBitmap, pixelsCroissance, potentielsCroissance, nbPart):
             nbPart += 1 
             if nouv[0] == 0 or nouv[0] == N-1 or nouv[1] == N-2 or nbPart > partMax : 
                 run = False 
-        print("N=", N, "eta=", eta, "nbpart=", nbPart, "MAXDELTA=", MAXDELTA)
-        return nbPart
+    except ValueError:
+        print("Bug boucle infini")
+        Error=1
     except IndexError:
-        print("Bug")
- 
-    print("N=", N, "eta=", eta, "nbpart=", nbPart, "MAXDELTA=", MAXDELTA)
-    return nbPart
+        print("Bug IndexError")
+        Error = 2
+    else:
+        print("eta=" + str(eta) + " N=" + str(N) + " MAXDELTA=" + str(MAXDELTA) + " nbPart=" + str(nbPart))
+    finally :
+        return (nbPart, Error)
  
 
 # Partie rajoutée
@@ -227,20 +234,20 @@ def Save_txt(y, N, fichier):
         print("", file=f)
     f.close()
 
-def Print_plt(Mat, N, eta, nbPart, fichier, afficher=False):
+def Print_plt(Mat, N, eta, nbPart, fichier, dossier, afficher=False):
     x = []
     y = []
     c="blue"                    # <--- Couleur des icones
     mk="o"                      # <--- Motifs des icones ("o", "x", "1")
     size=30                     # <--- Taille des icones
+    title=dossier + " nbPart="+str(nbPart)
     for i in range(1, N-1):
         for j in range(1, N-1):
             if Mat[i][j]:
                 x.append(j)
                 y.append(N-i)
     plt.scatter(x, y, color=c,  s=size, marker=mk)
-    # title="N="+str(N)+" eta="+str(eta)+" nbpart="+str(nbPart)+" MAXDELTA="+str(MAXDELTA)
-    plt.title("N="+str(N)+" eta="+str(eta)+" nbpart="+str(nbPart)+" MAXDELTA="+str(MAXDELTA))
+    plt.title(title)
     # plt.legend(loc='upper left')
     plt.axis([0,N,0,N])
     plt.savefig(fichier+".png")
@@ -248,18 +255,36 @@ def Print_plt(Mat, N, eta, nbPart, fichier, afficher=False):
         plt.show()
     plt.close()
 
+def Save_csv(eta, N, MAXDELTA, nbPart, diracine, dossier, file=""):
+    doc = diracine + file + dossier
+    if not (os.path.exists(doc + ".csv")):
+        f=open(doc + ".csv", "a")
+        print("eta;N;MAXDELTA;nbPart", file=f)
+        f.close()
+    f=open(doc + ".csv", "a")
+    for i in [str(eta), str(N), str(MAXDELTA), str(nbPart)]:
+        print(i, file=f, end=";")
+    print("", file=f)
+    f.close()
+
+
+eta = 6                                                                             # <--- eta
 # [64, 128, 256, 512]
-for N in [128]:
-    # MAXDELTA = MAXDELTA/1000.0
+for N in [64, 128, 256, 512]:                                                       # <--- N
     # [1, 0.1, 0.05, 0.017, 0.01, 0.005, 0.001, 0.0005, 0.0001]
-    for MAXDELTA in [0.0001]:
-        Premier = True
-        for i in range(50):
+    for MAXDELTA in [0.001, 0.0005, 0.0001]:      # <--- MAXDELTA
+
+        diracine = "..\\Image\\"
+        dossier = "eta=" + str(eta) + " N=" + str(N) + " MAXDELTA=" + str(MAXDELTA)
+        if not(os.path.exists(diracine + dossier)):
+            os.mkdir(diracine + dossier)
+        if not (os.path.exists(diracine + dossier + "\\" + "Erreur")):
+            os.mkdir(diracine + dossier + "\\" + " Erreur ")
+            
+        print("\t--- "+dossier+" ---")    
+        
+        for i in range(50):                                                         # <--- itération par run
             nbPart = 1
-            dossier = "..\\Image\\"+"eta="+str(eta)+" N="+str(N)+" MAXDELTA="+str(MAXDELTA)+"\\"
-            if Premier:
-                Premier = False
-                print(dossier)
             
             # la grille est de NxN mais en réalite la mesure d'une unité h est 1/N 
             pixelsBitmap = [[0 for j in range(N)] for i in range(N)] 
@@ -271,13 +296,18 @@ for N in [128]:
             pixelsCroissance = [] 
             potentielsCroissance = [] 
 
-            nbPart=main(pixelsBitmap, pixelsCroissance, potentielsCroissance, nbPart) 
-            
-            # fichier = "foudre-"+str(N)+"-"+str(eta)+"-"+str(MAXDELTA)+"-"+str(nbPart)+"-"+datetime.now().strftime("%Y%m%d%H%M%S")
+            print(str(i+1), end="\t")
+            nbPart, Error = main(pixelsBitmap, pixelsCroissance, potentielsCroissance, nbPart)
 
-            # eta=6 N=128 MAXDELTA=0,0001
 
-            fichier = dossier+"foudre-"+str(N)+"-"+str(eta)+"-"+str(MAXDELTA)+"-"+str(nbPart)+"-"+datetime.now().strftime("%Y%m%d%H%M%S")
-            np.save(fichier,np.array(dessinBitmap)) 
-            Save_txt(np.array(dessinBitmap), N, fichier)
-            Print_plt(np.array(dessinBitmap), N, eta, nbPart, fichier)
+            if Error != 2:
+                if Error:
+                    fichier = diracine + dossier + "\\Erreur\\"+"foudre-"+str(eta)+"-"+str(N)+"-"+str(MAXDELTA)+"-"+str(nbPart)+"-"+datetime.now().strftime("%Y%m%d%H%M%S")
+                else:
+                    fichier = diracine + dossier + "\\foudre-"+str(eta)+"-"+str(N)+"-"+str(MAXDELTA)+"-"+str(nbPart)+"-"+datetime.now().strftime("%Y%m%d%H%M%S")
+                    Save_csv(eta, N, MAXDELTA, nbPart, diracine, dossier)
+                np.save(fichier,np.array(dessinBitmap)) 
+                Save_txt(np.array(dessinBitmap), N, fichier)
+                Print_plt(np.array(dessinBitmap), N, eta, nbPart, fichier, dossier)
+        print("")
+input("Fini")
