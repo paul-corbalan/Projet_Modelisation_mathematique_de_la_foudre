@@ -1,7 +1,8 @@
 #!/usr/bin/env python3 
 # -*- coding: utf-8 -*- 
  
-import sys 
+import sys
+import os.path
 import random 
 import matplotlib.pyplot as plt 
 import numpy as np 
@@ -156,55 +157,66 @@ def majPotentielsCroissance(pixelsCroissance, potentielsCroissance, nbPart):
     for c in range(len(pixelsCroissance)): 
         potentielsCroissance[c] = potentielsBitmap[pixelsCroissance[c][0]][pixelsCroissance[c][1]] 
  
-def main(pixelsBitmap, pixelsCroissance, potentielsCroissance, nbPart): 
-    run = True 
-    init() 
-    # graine: début de décharge en haut au milieu 
-    graine = [int(N / 2), 1] 
-    nouv = graine 
-    pixelsBitmap[nouv[0]][nouv[1]] = 1 
-    dessinBitmap[nouv[1]][nouv[0]] = 1 
-    condInitBitmap[nouv[0]][nouv[1]] = -1 
-    potentielsBitmap[nouv[0]][nouv[1]] = 0 
+def main(pixelsBitmap, pixelsCroissance, potentielsCroissance, nbPart):
+    Error=0
     nbPart = 1 
-    while run == True: 
-        # elimine les pixelsCroissance qui sont proche de nouv 
-        eliminePixelsPres(nouv, pixelsCroissance, potentielsCroissance) 
-        # mise à jour de la carte des potentiels 
-        maxdelta = 1 
-        # condition d'arrêt à MAXDELTA du max des mises à jour des potentiels relatifs 
-        cf = 0 
-        if MAJPETITE: 
-            while maxdelta > MAXDELTA: 
-                maxdelta = majPotentielsSousBitmapRapide(nouv[0], nouv[1], S) 
-                cf += 1 
-        maxdelta = 1 
-        cs = 0 
-        while maxdelta > MAXDELTA and cs<200: 
-            maxdelta = majPotentielsBitmapRapide() 
-            #print(cs, " : ", maxdelta)
-            cs += 1 
-        # définition des nouveaux sites de croissance potentiels 
-        croissanceRapide(nouv, pixelsBitmap, pixelsCroissance, potentielsCroissance) 
-        # mise à jour des potentiels des candidats à la croissance 
-        majPotentielsCroissance(pixelsCroissance, potentielsCroissance, nbPart) 
-        res = choix(pixelsCroissance, potentielsCroissance) 
-        nouv = res[0] 
-        # le point choisi est elimine des croissances possibles 
-        pixelsCroissance.pop(res[1]) 
-        potentielsCroissance.pop(res[1]) 
-            # le point choisi est dessine 
+    try:
+        run = True 
+        init() 
+        # graine: début de décharge en haut au milieu 
+        graine = [int(N / 2), 1] 
+        nouv = graine 
         pixelsBitmap[nouv[0]][nouv[1]] = 1 
         dessinBitmap[nouv[1]][nouv[0]] = 1 
-        # le point choisi devient une contrainte à potentiel nul 
         condInitBitmap[nouv[0]][nouv[1]] = -1 
         potentielsBitmap[nouv[0]][nouv[1]] = 0 
-        nbPart += 1 
-        if nouv[0] == 0 or nouv[0] == N-1 or nouv[1] == N-2 or nbPart > partMax : 
-            run = False 
- 
-    print("N=", N, "eta=", eta, "nbpart=", nbPart, "MAXDELTA=", MAXDELTA)
-    return nbPart
+        while run == True: 
+        # elimine les pixelsCroissance qui sont proche de nouv 
+            eliminePixelsPres(nouv, pixelsCroissance, potentielsCroissance) 
+        # mise à jour de la carte des potentiels 
+            maxdelta = 1 
+        # condition d'arrêt à MAXDELTA du max des mises à jour des potentiels relatifs 
+            cf = 0 
+            if MAJPETITE: 
+                while maxdelta > MAXDELTA: 
+                    maxdelta = majPotentielsSousBitmapRapide(nouv[0], nouv[1], S) 
+                    cf += 1 
+            maxdelta = 1 
+            cs = 0 
+            while maxdelta > MAXDELTA and cs<200: 
+                maxdelta = majPotentielsBitmapRapide() 
+            #print(cs, " : ", maxdelta)
+                cs += 1 
+        # définition des nouveaux sites de croissance potentiels 
+            # if cs>=200:
+            #     raise ValueError
+            croissanceRapide(nouv, pixelsBitmap, pixelsCroissance, potentielsCroissance) 
+        # mise à jour des potentiels des candidats à la croissance 
+            majPotentielsCroissance(pixelsCroissance, potentielsCroissance, nbPart) 
+            res = choix(pixelsCroissance, potentielsCroissance) 
+            nouv = res[0] 
+        # le point choisi est elimine des croissances possibles 
+            pixelsCroissance.pop(res[1]) 
+            potentielsCroissance.pop(res[1]) 
+                # le point choisi est dessine 
+            pixelsBitmap[nouv[0]][nouv[1]] = 1 
+            dessinBitmap[nouv[1]][nouv[0]] = 1 
+        # le point choisi devient une contrainte à potentiel nul 
+            condInitBitmap[nouv[0]][nouv[1]] = -1 
+            potentielsBitmap[nouv[0]][nouv[1]] = 0 
+            nbPart += 1 
+            if nouv[0] == 0 or nouv[0] == N-1 or nouv[1] == N-2 or nbPart > partMax : 
+                run = False 
+    except ValueError:
+        print("Bug boucle infini")
+        Error=1
+    except IndexError:
+        print("Bug IndexError")
+        Error = 2
+    else:
+        print("eta=" + str(eta) + " N=" + str(N) + " MAXDELTA=" + str(MAXDELTA) + " nbPart=" + str(nbPart))
+    finally :
+        return (nbPart, Error)
  
 
 # Partie rajoutée
@@ -222,20 +234,20 @@ def Save_txt(y, N, fichier):
         print("", file=f)
     f.close()
 
-def Print_plt(Mat, N, eta, nbPart, fichier, afficher=False):
+def Print_plt(Mat, N, eta, nbPart, fichier, dossier, afficher=False):
     x = []
     y = []
     c="blue"                    # <--- Couleur des icones
     mk="o"                      # <--- Motifs des icones ("o", "x", "1")
     size=30                     # <--- Taille des icones
+    title=dossier + " nbPart="+str(nbPart)
     for i in range(1, N-1):
         for j in range(1, N-1):
             if Mat[i][j]:
                 x.append(j)
                 y.append(N-i)
     plt.scatter(x, y, color=c,  s=size, marker=mk)
-    # title="N="+str(N)+" eta="+str(eta)+" nbpart="+str(nbPart)+" MAXDELTA="+str(MAXDELTA)
-    plt.title("N="+str(N)+" eta="+str(eta)+" nbpart="+str(nbPart)+" MAXDELTA="+str(MAXDELTA))
+    plt.title(title)
     # plt.legend(loc='upper left')
     plt.axis([0,N,0,N])
     plt.savefig(fichier+".png")
@@ -243,14 +255,34 @@ def Print_plt(Mat, N, eta, nbPart, fichier, afficher=False):
         plt.show()
     plt.close()
 
+def Save_csv(eta, N, MAXDELTA, nbPart, dossier, file=""):
+    if not (os.path.exists(file + dossier + ".csv")):
+        f=open(file + dossier + ".csv", "a")
+        print("eta;N;MAXDELTA;nbPart", file=f)
+        f.close()
+    f=open(file + dossier + ".csv", "a")
+    for i in [str(eta), str(N), str(MAXDELTA), str(nbPart)]:
+        print(i, file=f, end=";")
+    print("", file=f)
+    f.close()
 
-eta = 3
+
+eta = 3                                                                             # <--- eta
 # [64, 128, 256, 512]
-for N in [64, 128, 256, 512]:
+for N in [64, 128, 256, 512]:                                                       # <--- N
     # [1, 0.1, 0.05, 0.017, 0.01, 0.005, 0.001, 0.0005, 0.0001]
-    for MAXDELTA in [1, 0.1, 0.05, 0.017, 0.01, 0.005, 0.001, 0.0005, 0.0001]:
-        for i in range(50):
-            nbPart=1
+    for MAXDELTA in [1, 0.1, 0.05, 0.017, 0.01, 0.005, 0.001, 0.0005, 0.0001]:      # <--- MAXDELTA
+
+        dossier = "eta=" + str(eta) + " N=" + str(N) + " MAXDELTA=" + str(MAXDELTA)
+        if not(os.path.exists(dossier)):
+            os.mkdir(dossier)
+        # if not (os.path.exists(dossier + "\\" + "Erreur")):
+        #     os.mkdir(dossier + "\\" + "Erreur")
+        print("\t--- "+dossier+" ---")    
+        
+        for i in range(50):                                                         # <--- itération par run
+            nbPart = 1
+            
             # la grille est de NxN mais en réalite la mesure d'une unité h est 1/N 
             pixelsBitmap = [[0 for j in range(N)] for i in range(N)] 
             # que pour le dessin pour éviter la transposition 
@@ -261,9 +293,18 @@ for N in [64, 128, 256, 512]:
             pixelsCroissance = [] 
             potentielsCroissance = [] 
 
-            nbPart=main(pixelsBitmap, pixelsCroissance, potentielsCroissance, nbPart) 
-            
-            fichier = "foudre-"+str(N)+"-"+str(eta)+"-"+str(MAXDELTA)+"-"+str(nbPart)+"-"+datetime.now().strftime("%Y%m%d%H%M%S")
-            np.save(fichier,np.array(dessinBitmap)) 
-            Save_txt(np.array(dessinBitmap), N, fichier)
-            Print_plt(np.array(dessinBitmap), N, eta, nbPart, fichier)
+            print(str(i+1), end="\t")
+            nbPart, Error = main(pixelsBitmap, pixelsCroissance, potentielsCroissance, nbPart)
+
+
+            if Error != 2:
+                if Error:
+                    fichier = dossier + "\\" + "Erreur\\"+"foudre-"+str(eta)+"-"+str(N)+"-"+str(MAXDELTA)+"-"+str(nbPart)+"-"+datetime.now().strftime("%Y%m%d%H%M%S")
+                else:
+                    fichier = dossier + "\\" + "foudre-"+str(eta)+"-"+str(N)+"-"+str(MAXDELTA)+"-"+str(nbPart)+"-"+datetime.now().strftime("%Y%m%d%H%M%S")
+                    Save_csv(eta, N, MAXDELTA, nbPart, dossier)
+                np.save(fichier,np.array(dessinBitmap)) 
+                Save_txt(np.array(dessinBitmap), N, fichier)
+                Print_plt(np.array(dessinBitmap), N, eta, nbPart, fichier, dossier)
+        print("")
+input("Fini")
