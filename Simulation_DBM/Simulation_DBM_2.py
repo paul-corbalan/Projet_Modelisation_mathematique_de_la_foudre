@@ -255,19 +255,6 @@ def Print_plt(Mat, N, eta, nbPart, fichier, dossier, afficher=False):
         plt.show()
     plt.close()
 
-<<<<<<< HEAD
-
-eta = 6
-# [64, 128, 256, 512]
-for N in [64, 128, 256, 512]:
-    # MAXDELTA = MAXDELTA/1000.0
-    # [1, 0.1, 0.05, 0.017, 0.01, 0.005, 0.001, 0.0005, 0.0001]
-    for MAXDELTA in [0.001, 0.0005, 0.0001]:
-
-        for i in range(50):
-            nbPart = 1
-            dossier = "..\\Image\\"+"eta="+str(eta)+" N="+str(N)+" MAXDELTA="+str(MAXDELTA)+"\\"
-=======
 def Save_csv(eta, N, MAXDELTA, nbPart, diracine, dossier, file=""):
     doc = diracine + file + dossier
     if not (os.path.exists(doc + ".csv")):
@@ -298,7 +285,6 @@ for N in [64, 128, 256, 512]:                                                   
         
         for i in range(50):                                                         # <--- itération par run
             nbPart = 1
->>>>>>> Temp
             
             # la grille est de NxN mais en réalite la mesure d'une unité h est 1/N 
             pixelsBitmap = [[0 for j in range(N)] for i in range(N)] 
@@ -310,18 +296,6 @@ for N in [64, 128, 256, 512]:                                                   
             pixelsCroissance = [] 
             potentielsCroissance = [] 
 
-<<<<<<< HEAD
-            nbPart=main(pixelsBitmap, pixelsCroissance, potentielsCroissance, nbPart) 
-            
-            # fichier = "foudre-"+str(N)+"-"+str(eta)+"-"+str(MAXDELTA)+"-"+str(nbPart)+"-"+datetime.now().strftime("%Y%m%d%H%M%S")
-
-            # eta=6 N=128 MAXDELTA=0,0001
-
-            fichier = dossier+"foudre-"+str(N)+"-"+str(eta)+"-"+str(MAXDELTA)+"-"+str(nbPart)+"-"+datetime.now().strftime("%Y%m%d%H%M%S")
-            np.save(fichier,np.array(dessinBitmap)) 
-            Save_txt(np.array(dessinBitmap), N, fichier)
-            Print_plt(np.array(dessinBitmap), N, eta, nbPart, fichier)
-=======
             print(str(i+1), end="\t")
             nbPart, Error = main(pixelsBitmap, pixelsCroissance, potentielsCroissance, nbPart)
 
@@ -337,4 +311,3 @@ for N in [64, 128, 256, 512]:                                                   
                 Print_plt(np.array(dessinBitmap), N, eta, nbPart, fichier, dossier)
         print("")
 input("Fini")
->>>>>>> Temp
