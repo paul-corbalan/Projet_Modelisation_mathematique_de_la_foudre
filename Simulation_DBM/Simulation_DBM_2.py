@@ -246,7 +246,7 @@ def Print_plt(Mat, N, eta, nbPart, fichier, afficher=False):
 # [64, 128, 256, 512]
 for N in [128]:
     # MAXDELTA = MAXDELTA/1000.0
-    # [0.001, 0.0005, 0.0001]
+    # [1, 0.1, 0.05, 0.017, 0.01, 0.005, 0.001, 0.0005, 0.0001]
     for MAXDELTA in [0.0001]:
         Premier = True
         for i in range(50):
