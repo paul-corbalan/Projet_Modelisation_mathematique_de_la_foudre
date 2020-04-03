@@ -157,51 +157,56 @@ def majPotentielsCroissance(pixelsCroissance, potentielsCroissance, nbPart):
         potentielsCroissance[c] = potentielsBitmap[pixelsCroissance[c][0]][pixelsCroissance[c][1]] 
  
 def main(pixelsBitmap, pixelsCroissance, potentielsCroissance, nbPart): 
-    run = True 
-    init() 
-    # graine: début de décharge en haut au milieu 
-    graine = [int(N / 2), 1] 
-    nouv = graine 
-    pixelsBitmap[nouv[0]][nouv[1]] = 1 
-    dessinBitmap[nouv[1]][nouv[0]] = 1 
-    condInitBitmap[nouv[0]][nouv[1]] = -1 
-    potentielsBitmap[nouv[0]][nouv[1]] = 0 
-    nbPart = 1 
-    while run == True: 
-        # elimine les pixelsCroissance qui sont proche de nouv 
-        eliminePixelsPres(nouv, pixelsCroissance, potentielsCroissance) 
-        # mise à jour de la carte des potentiels 
-        maxdelta = 1 
-        # condition d'arrêt à MAXDELTA du max des mises à jour des potentiels relatifs 
-        cf = 0 
-        if MAJPETITE: 
-            while maxdelta > MAXDELTA: 
-                maxdelta = majPotentielsSousBitmapRapide(nouv[0], nouv[1], S) 
-                cf += 1 
-        maxdelta = 1 
-        cs = 0 
-        while maxdelta > MAXDELTA and cs<200: 
-            maxdelta = majPotentielsBitmapRapide() 
-            #print(cs, " : ", maxdelta)
-            cs += 1 
-        # définition des nouveaux sites de croissance potentiels 
-        croissanceRapide(nouv, pixelsBitmap, pixelsCroissance, potentielsCroissance) 
-        # mise à jour des potentiels des candidats à la croissance 
-        majPotentielsCroissance(pixelsCroissance, potentielsCroissance, nbPart) 
-        res = choix(pixelsCroissance, potentielsCroissance) 
-        nouv = res[0] 
-        # le point choisi est elimine des croissances possibles 
-        pixelsCroissance.pop(res[1]) 
-        potentielsCroissance.pop(res[1]) 
-            # le point choisi est dessine 
+    try:
+        run = True 
+        init() 
+        # graine: début de décharge en haut au milieu 
+        graine = [int(N / 2), 1] 
+        nouv = graine 
         pixelsBitmap[nouv[0]][nouv[1]] = 1 
         dessinBitmap[nouv[1]][nouv[0]] = 1 
-        # le point choisi devient une contrainte à potentiel nul 
         condInitBitmap[nouv[0]][nouv[1]] = -1 
         potentielsBitmap[nouv[0]][nouv[1]] = 0 
-        nbPart += 1 
-        if nouv[0] == 0 or nouv[0] == N-1 or nouv[1] == N-2 or nbPart > partMax : 
-            run = False 
+        nbPart = 1 
+        while run == True: 
+        # elimine les pixelsCroissance qui sont proche de nouv 
+            eliminePixelsPres(nouv, pixelsCroissance, potentielsCroissance) 
+        # mise à jour de la carte des potentiels 
+            maxdelta = 1 
+        # condition d'arrêt à MAXDELTA du max des mises à jour des potentiels relatifs 
+            cf = 0 
+            if MAJPETITE: 
+                while maxdelta > MAXDELTA: 
+                    maxdelta = majPotentielsSousBitmapRapide(nouv[0], nouv[1], S) 
+                    cf += 1 
+            maxdelta = 1 
+            cs = 0 
+            while maxdelta > MAXDELTA and cs<200: 
+                maxdelta = majPotentielsBitmapRapide() 
+            #print(cs, " : ", maxdelta)
+                cs += 1 
+        # définition des nouveaux sites de croissance potentiels 
+            croissanceRapide(nouv, pixelsBitmap, pixelsCroissance, potentielsCroissance) 
+        # mise à jour des potentiels des candidats à la croissance 
+            majPotentielsCroissance(pixelsCroissance, potentielsCroissance, nbPart) 
+            res = choix(pixelsCroissance, potentielsCroissance) 
+            nouv = res[0] 
+        # le point choisi est elimine des croissances possibles 
+            pixelsCroissance.pop(res[1]) 
+            potentielsCroissance.pop(res[1]) 
+                # le point choisi est dessine 
+            pixelsBitmap[nouv[0]][nouv[1]] = 1 
+            dessinBitmap[nouv[1]][nouv[0]] = 1 
+        # le point choisi devient une contrainte à potentiel nul 
+            condInitBitmap[nouv[0]][nouv[1]] = -1 
+            potentielsBitmap[nouv[0]][nouv[1]] = 0 
+            nbPart += 1 
+            if nouv[0] == 0 or nouv[0] == N-1 or nouv[1] == N-2 or nbPart > partMax : 
+                run = False 
+        print("N=", N, "eta=", eta, "nbpart=", nbPart, "MAXDELTA=", MAXDELTA)
+        return nbPart
+    except IndexError:
+        print("Bug")
  
     print("N=", N, "eta=", eta, "nbpart=", nbPart, "MAXDELTA=", MAXDELTA)
     return nbPart
