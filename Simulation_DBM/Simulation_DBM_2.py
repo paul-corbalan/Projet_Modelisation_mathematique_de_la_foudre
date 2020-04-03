@@ -238,18 +238,24 @@ def Print_plt(Mat, N, eta, nbPart, fichier, afficher=False):
     plt.title("N="+str(N)+" eta="+str(eta)+" nbpart="+str(nbPart)+" MAXDELTA="+str(MAXDELTA))
     # plt.legend(loc='upper left')
     plt.axis([0,N,0,N])
-    plt.savefig("..\\Image\\"+fichier+".png")
+    plt.savefig(fichier+".png")
     if afficher:
         plt.show()
     plt.close()
 
-# [0.001, 0.0005, 0.0001]
-for MAXDELTA in [0.001, 0.0005, 0.0001]:
+# [64, 128, 256, 512]
+for N in [128]:
     # MAXDELTA = MAXDELTA/1000.0
-    # [64, 128, 256, 512]
-    for N in [64, 128, 256, 512]:
+    # [0.001, 0.0005, 0.0001]
+    for MAXDELTA in [0.0001]:
+        Premier = True
         for i in range(50):
-            nbPart=1
+            nbPart = 1
+            dossier = "..\\Image\\"+"eta="+str(eta)+" N="+str(N)+" MAXDELTA="+str(MAXDELTA)+"\\"
+            if Premier:
+                Premier = False
+                print(dossier)
+            
             # la grille est de NxN mais en réalite la mesure d'une unité h est 1/N 
             pixelsBitmap = [[0 for j in range(N)] for i in range(N)] 
             # que pour le dessin pour éviter la transposition 
@@ -262,7 +268,11 @@ for MAXDELTA in [0.001, 0.0005, 0.0001]:
 
             nbPart=main(pixelsBitmap, pixelsCroissance, potentielsCroissance, nbPart) 
             
-            fichier = "foudre-"+str(N)+"-"+str(eta)+"-"+str(MAXDELTA)+"-"+str(nbPart)+"-"+datetime.now().strftime("%Y%m%d%H%M%S")
-            np.save("..\\Image\\"+fichier,np.array(dessinBitmap)) 
-            Save_txt(np.array(dessinBitmap), N, "..\\Image\\"+fichier)
+            # fichier = "foudre-"+str(N)+"-"+str(eta)+"-"+str(MAXDELTA)+"-"+str(nbPart)+"-"+datetime.now().strftime("%Y%m%d%H%M%S")
+
+            # eta=6 N=128 MAXDELTA=0,0001
+
+            fichier = dossier+"foudre-"+str(N)+"-"+str(eta)+"-"+str(MAXDELTA)+"-"+str(nbPart)+"-"+datetime.now().strftime("%Y%m%d%H%M%S")
+            np.save(fichier,np.array(dessinBitmap)) 
+            Save_txt(np.array(dessinBitmap), N, fichier)
             Print_plt(np.array(dessinBitmap), N, eta, nbPart, fichier)
