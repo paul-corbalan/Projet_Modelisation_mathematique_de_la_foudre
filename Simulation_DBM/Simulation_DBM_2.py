@@ -279,7 +279,7 @@ for N in [64, 128, 256, 512]:                                                   
         if not(os.path.exists(diracine + dossier)):
             os.mkdir(diracine + dossier)
         if not (os.path.exists(diracine + dossier + "\\" + "Erreur")):
-            os.mkdir(diracine + dossier + "\\" + " Erreur ")
+            os.mkdir(diracine + dossier + "\\" + "Erreur")
             
         print("\t--- "+dossier+" ---")    
         
