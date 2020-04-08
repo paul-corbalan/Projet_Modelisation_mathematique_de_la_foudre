@@ -69,4 +69,4 @@ def main(folder=".\\", n=0):
     return (Moyenne, Ecart)
 
 main()
-# input()
+input()
