@@ -43,7 +43,7 @@ def Calcul_dim(y, n=0):
                         Trouver = True
     return Dim(dim, N1//L)
 
-def main(folder=".\\", n=0):
+def Calcul_Dossier(folder=".\\", n=0):
     npy_list = [f for f in glob.glob(folder + "*.npy")]
     S=[]
 
@@ -68,5 +68,17 @@ def main(folder=".\\", n=0):
     
     return (Moyenne, Ecart)
 
-main()
+def main(folder=".", n=0):
+    # folder_list = [f for f in os.listdir(folder) if os.path.isfile(os.path.join(folder, d))]
+    folder_list = [f for f in glob.glob(folder + "\\*\\")]
+
+    Resultat = []
+    for dossier in folder_list:
+        print("\t--- " + dossier + " ---")
+        Resultat.append(Calcul_Dossier(dossier))
+        print("")
+        print("")
+    return Resultat
+
+main("..\\Image")
 # input()
