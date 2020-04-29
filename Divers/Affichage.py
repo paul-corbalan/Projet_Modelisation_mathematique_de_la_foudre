@@ -61,3 +61,13 @@ def Print_plt(Mat, fichier, rep=".\\", afficher=False, save=True):
     if afficher:
         plt.show()
     plt.close()
+
+
+def Print_mat(y, fichier, rep=".\\", afficher=False, save=True):
+    heatmap = plt.pcolor(y)
+    plt.colorbar(heatmap)
+    if save:
+        plt.savefig(rep+fichier+".png")
+    if afficher:
+        plt.show()
+    plt.close()
