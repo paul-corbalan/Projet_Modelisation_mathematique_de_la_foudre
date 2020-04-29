@@ -11,7 +11,7 @@ def Import_dessinBitmap(file):
     return array.tolist()
 
 
-def Afficher_Array(y):
+def Afficher_array(y):
     space = ' '  # <--- Pour modifier les espaces
     N1 = len(y)
     for i in range(N1):
@@ -71,3 +71,12 @@ def Print_mat(y, fichier, rep=".\\", afficher=False, save=True):
     if afficher:
         plt.show()
     plt.close()
+
+
+def main(repc=".\\", reps=".\\"):
+    for f in glob.glob(repc + "*.npy"):
+        y = Import_dessinBitmap(f)
+        Print_mat(y, f, rep=reps)
+
+
+main()
