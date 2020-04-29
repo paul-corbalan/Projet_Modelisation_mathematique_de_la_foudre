@@ -24,6 +24,22 @@ def Afficher_Array(y):
         print("")
 
 
+def Afficher_as_txt(y):
+    space = ' '                    # <--- Pour modifier les espaces
+    plein = '#'
+    vide = ' '
+
+    N1 = len(y)
+    for i in range(N1):
+        N2 = len(y[i])
+        for j in range(N2):
+            if y[i][j]:
+                print(plein, end=space)
+            else:
+                print(vide, end=space)
+        print("")
+
+
 def Print_plt(Mat, fichier, rep=".\\", afficher=False, save=True):
     x = []
     y = []
@@ -37,9 +53,8 @@ def Print_plt(Mat, fichier, rep=".\\", afficher=False, save=True):
             if Mat[i][j]:
                 x.append(j)
                 y.append(N1-i)
-    plt.scatter(x, y, color=c, label=fichier, s=size, marker=mk)
-    plt.title("Simulation de foudre")
-    plt.legend(loc='upper left')
+    plt.scatter(x, y, color=c, s=size, marker=mk)
+    plt.title(fichier)
     plt.axis([0, N1, 0, N2])
     if save:
         plt.savefig(rep+fichier+".png")
